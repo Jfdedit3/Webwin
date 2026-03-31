@@ -1,11 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('webwin', {
-  openExternal: (url) => ipcRenderer.invoke('open-external', url),
-  showItemInFolder: (filePath) => ipcRenderer.invoke('show-item-in-folder', filePath),
+  pickFolder: () => ipcRenderer.invoke('pick-folder'),
   openPath: (filePath) => ipcRenderer.invoke('open-path', filePath),
-  getDownloads: () => ipcRenderer.invoke('get-downloads'),
-  onOpenNewTab: (callback) => ipcRenderer.on('open-new-tab', (_, url) => callback(url)),
-  onDownloadCreated: (callback) => ipcRenderer.on('download-created', (_, entry) => callback(entry)),
-  onDownloadUpdated: (callback) => ipcRenderer.on('download-updated', (_, entry) => callback(entry))
+  showItemInFolder: (filePath) => ipcRenderer.invoke('show-item-in-folder', filePath)
 });

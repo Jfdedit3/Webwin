@@ -1,82 +1,75 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 const isMac = process.platform === 'darwin';
 let mainWindow;
-let downloads = [];
 
-function sendToRenderer(channel, payload) {
-  if (!mainWindow || mainWindow.isDestroyed()) return;
-  mainWindow.webContents.send(channel, payload);
-}
-
-function registerDownloadEvents() {
-  const ses = mainWindow.webContents.session;
-
-  ses.on('will-download', (event, item) => {
-    const id = `${Date.now()}_${Math.random().toString(16).slice(2)}`;
-    const entry = {
-      id,
-      fileName: item.getFilename(),
-      url: item.getURL(),
-      savePath: item.getSavePath(),
-      totalBytes: item.getTotalBytes(),
-      receivedBytes: 0,
-      state: 'progressing'
-    };
-
-    downloads.unshift(entry);
-    sendToRenderer('download-created', entry);
-
-    item.on('updated', () => {
-      entry.receivedBytes = item.getReceivedBytes();
-      entry.totalBytes = item.getTotalBytes();
-      entry.savePath = item.getSavePath();
-      entry.state = item.isPaused() ? 'paused' : 'progressing';
-      sendToRenderer('download-updated', entry);
-    });
-
-    item.once('done', (_, state) => {
-      entry.receivedBytes = item.getReceivedBytes();
-      entry.totalBytes = item.getTotalBytes();
-      entry.savePath = item.getSavePath();
-      entry.state = state;
-      sendToRenderer('download-updated', entry);
-    });
-  });
-}
+const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp']);
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1520,
-    height: 940,
-    minWidth: 1080,
-    minHeight: 720,
-    backgroundColor: '#070b16',
+    width: 1560,
+    height: 960,
+    minWidth: 1100,
+    minHeight: 760,
+    backgroundColor: '#050914',
     autoHideMenuBar: true,
-    title: 'Webwin',
+    title: 'Webwin Gallery',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       sandbox: false,
-      nodeIntegration: false,
-      webviewTag: true
+      nodeIntegration: false
     }
   });
 
   mainWindow.loadFile(path.join(__dirname, 'src', 'renderer', 'index.html'));
+}
 
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    sendToRenderer('open-new-tab', url);
-    return { action: 'deny' };
-  });
+function scanDirectoryRecursive(dirPath, files = []) {
+  let entries = [];
+  try {
+    entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  } catch {
+    return files;
+  }
 
-  registerDownloadEvents();
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      scanDirectoryRecursive(fullPath, files);
+      continue;
+    }
+
+    const ext = path.extname(entry.name).toLowerCase();
+    if (!IMAGE_EXTENSIONS.has(ext)) continue;
+
+    let stat;
+    try {
+      stat = fs.statSync(fullPath);
+    } catch {
+      continue;
+    }
+
+    files.push({
+      id: `${stat.mtimeMs}_${entry.name}_${files.length}`,
+      name: entry.name,
+      path: fullPath,
+      directory: dirPath,
+      extension: ext,
+      size: stat.size,
+      modifiedAt: stat.mtime.toISOString(),
+      createdAt: stat.birthtime.toISOString(),
+      fileUrl: `file://${fullPath.replace(/\\/g, '/')}`
+    });
+  }
+
+  return files;
 }
 
 app.whenReady().then(() => {
   createWindow();
-
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
@@ -86,16 +79,18 @@ app.on('window-all-closed', () => {
   if (!isMac) app.quit();
 });
 
-ipcMain.handle('open-external', async (_, url) => {
-  if (!url) return false;
-  await shell.openExternal(url);
-  return true;
-});
+ipcMain.handle('pick-folder', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  });
 
-ipcMain.handle('show-item-in-folder', async (_, filePath) => {
-  if (!filePath) return false;
-  shell.showItemInFolder(filePath);
-  return true;
+  if (result.canceled || !result.filePaths?.length) {
+    return { canceled: true, folderPath: null, images: [] };
+  }
+
+  const folderPath = result.filePaths[0];
+  const images = scanDirectoryRecursive(folderPath).sort((a, b) => a.name.localeCompare(b.name));
+  return { canceled: false, folderPath, images };
 });
 
 ipcMain.handle('open-path', async (_, filePath) => {
@@ -104,4 +99,8 @@ ipcMain.handle('open-path', async (_, filePath) => {
   return !result;
 });
 
-ipcMain.handle('get-downloads', async () => downloads);
+ipcMain.handle('show-item-in-folder', async (_, filePath) => {
+  if (!filePath) return false;
+  shell.showItemInFolder(filePath);
+  return true;
+});
