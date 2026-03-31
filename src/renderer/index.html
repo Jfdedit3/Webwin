@@ -3,96 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webwin</title>
+  <title>Webwin Gallery</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <div class="brand-section">
-        <div class="brand-dot"></div>
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-orb"></div>
         <div>
-          <div class="brand-title">Webwin</div>
-          <div class="brand-subtitle">Windows Browser</div>
+          <div class="brand-title">Webwin Gallery</div>
+          <div class="brand-subtitle">Windows photo viewer and library</div>
         </div>
       </div>
 
-      <div class="tabs-section">
-        <div id="tabs" class="tabs"></div>
+      <div class="sidebar-actions">
+        <button id="openFolderButton" class="primary-button" type="button">Open folder</button>
+        <button id="slideshowButton" class="ghost-button" type="button">Slideshow</button>
+      </div>
+
+      <div class="sidebar-meta">
+        <div class="meta-card">
+          <span>Current folder</span>
+          <strong id="folderPathLabel">No folder selected</strong>
+        </div>
+        <div class="meta-card">
+          <span>Images</span>
+          <strong id="imageCountLabel">0</strong>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-stage">
+      <header class="topbar">
+        <div class="topbar-copy">
+          <h1>Your gallery</h1>
+          <p>Browse images from a local folder, preview them at scale, and inspect file details like a native Windows Photos-style app.</p>
+        </div>
         <div class="topbar-actions">
-          <button id="menuButton" class="icon-button" type="button">☰</button>
-          <button id="newTabButton" class="icon-button primary" type="button">+</button>
+          <input id="searchInput" class="search-input" type="text" placeholder="Search images by filename" />
+          <select id="sortSelect" class="sort-select">
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="date-desc">Newest first</option>
+            <option value="date-asc">Oldest first</option>
+            <option value="size-desc">Largest first</option>
+            <option value="size-asc">Smallest first</option>
+          </select>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <section class="toolbar">
-      <div class="nav-group">
-        <button id="backButton" class="icon-button" type="button">←</button>
-        <button id="forwardButton" class="icon-button" type="button">→</button>
-        <button id="reloadButton" class="icon-button" type="button">⟳</button>
-        <button id="homeButton" class="icon-button" type="button">⌂</button>
-      </div>
-
-      <form id="addressForm" class="address-form">
-        <input id="addressInput" class="address-input" type="text" placeholder="Search the web or enter a URL" autocomplete="off" />
-      </form>
-
-      <div class="actions-group">
-        <button id="bookmarkButton" class="action-button" type="button">Bookmark</button>
-        <button id="bookmarksToggleButton" class="action-button" type="button">Bookmarks</button>
-      </div>
-    </section>
-
-    <div class="browser-stage">
-      <aside id="menuPanel" class="side-panel hidden">
-        <div class="panel-header">
-          <h2>Menu</h2>
-          <button id="closeMenuButton" class="icon-button" type="button">×</button>
+      <section class="viewer-stage">
+        <div class="viewer-panel">
+          <div class="viewer-toolbar">
+            <button id="prevButton" class="icon-button" type="button">←</button>
+            <button id="nextButton" class="icon-button" type="button">→</button>
+            <button id="openFileButton" class="ghost-button" type="button">Open file</button>
+            <button id="showFolderButton" class="ghost-button" type="button">Show in folder</button>
+          </div>
+          <div id="viewerContent" class="viewer-content empty-viewer">
+            <div class="viewer-empty">
+              <div class="empty-title">No image selected</div>
+              <div class="empty-text">Choose a folder and click a picture to preview it here.</div>
+            </div>
+          </div>
         </div>
-        <div class="menu-list">
-          <button id="menuNewTab" class="menu-item" type="button">New tab</button>
-          <button id="menuBookmarks" class="menu-item" type="button">Bookmarks</button>
-          <button id="menuHistory" class="menu-item" type="button">History</button>
-          <button id="menuDownloads" class="menu-item" type="button">Downloads</button>
-          <button id="menuRestore" class="menu-item" type="button">Restore session now</button>
-        </div>
-      </aside>
 
-      <aside id="bookmarksPanel" class="side-panel hidden panel-right">
-        <div class="panel-header">
-          <h2>Bookmarks</h2>
-          <button id="closeBookmarksButton" class="icon-button" type="button">×</button>
-        </div>
-        <div id="bookmarksList" class="panel-list"></div>
-      </aside>
+        <aside class="info-panel">
+          <div class="info-header">
+            <h2>Details</h2>
+          </div>
+          <div id="detailsContent" class="details-content empty-details">
+            <div class="empty-text">No file selected.</div>
+          </div>
+        </aside>
+      </section>
 
-      <aside id="historyPanel" class="side-panel hidden panel-right">
-        <div class="panel-header">
-          <h2>History</h2>
-          <button id="closeHistoryButton" class="icon-button" type="button">×</button>
+      <section class="library-section">
+        <div class="section-header">
+          <h3>Library</h3>
+          <div id="resultsLabel" class="section-meta">0 images</div>
         </div>
-        <div class="panel-actions">
-          <button id="clearHistoryButton" class="action-button" type="button">Clear history</button>
-        </div>
-        <div id="historyList" class="panel-list"></div>
-      </aside>
-
-      <aside id="downloadsPanel" class="side-panel hidden panel-right">
-        <div class="panel-header">
-          <h2>Downloads</h2>
-          <button id="closeDownloadsButton" class="icon-button" type="button">×</button>
-        </div>
-        <div id="downloadsList" class="panel-list"></div>
-      </aside>
-
-      <main id="webviews" class="webviews"></main>
-
-      <div class="bottom-info">
-        <div id="statusText">Ready</div>
-        <div id="pageMeta">No page loaded</div>
-      </div>
-    </div>
+        <div id="galleryGrid" class="gallery-grid"></div>
+      </section>
+    </main>
   </div>
 
   <script src="./app.js"></script>
