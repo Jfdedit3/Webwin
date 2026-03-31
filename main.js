@@ -5,18 +5,16 @@ const isMac = process.platform === 'darwin';
 let mainWindow;
 let downloads = [];
 
-function sendToRenderer(channel, payload) {
+function emit(channel, payload) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   mainWindow.webContents.send(channel, payload);
 }
 
-function registerDownloadEvents() {
+function attachDownloadTracking() {
   const ses = mainWindow.webContents.session;
-
-  ses.on('will-download', (event, item) => {
-    const id = `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  ses.on('will-download', (_, item) => {
     const entry = {
-      id,
+      id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
       fileName: item.getFilename(),
       url: item.getURL(),
       savePath: item.getSavePath(),
@@ -26,14 +24,14 @@ function registerDownloadEvents() {
     };
 
     downloads.unshift(entry);
-    sendToRenderer('download-created', entry);
+    emit('download-created', entry);
 
     item.on('updated', () => {
       entry.receivedBytes = item.getReceivedBytes();
       entry.totalBytes = item.getTotalBytes();
       entry.savePath = item.getSavePath();
       entry.state = item.isPaused() ? 'paused' : 'progressing';
-      sendToRenderer('download-updated', entry);
+      emit('download-updated', entry);
     });
 
     item.once('done', (_, state) => {
@@ -41,42 +39,34 @@ function registerDownloadEvents() {
       entry.totalBytes = item.getTotalBytes();
       entry.savePath = item.getSavePath();
       entry.state = state;
-      sendToRenderer('download-updated', entry);
+      emit('download-updated', entry);
     });
   });
 }
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1520,
-    height: 940,
-    minWidth: 1080,
-    minHeight: 720,
-    backgroundColor: '#070b16',
+    width: 1540,
+    height: 950,
+    minWidth: 1120,
+    minHeight: 760,
+    backgroundColor: '#050915',
     autoHideMenuBar: true,
-    title: 'Webwin',
+    title: 'Webwin Hub',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       sandbox: false,
-      nodeIntegration: false,
-      webviewTag: true
+      nodeIntegration: false
     }
   });
 
   mainWindow.loadFile(path.join(__dirname, 'src', 'renderer', 'index.html'));
-
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    sendToRenderer('open-new-tab', url);
-    return { action: 'deny' };
-  });
-
-  registerDownloadEvents();
+  attachDownloadTracking();
 }
 
 app.whenReady().then(() => {
   createWindow();
-
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
@@ -89,6 +79,12 @@ app.on('window-all-closed', () => {
 ipcMain.handle('open-external', async (_, url) => {
   if (!url) return false;
   await shell.openExternal(url);
+  return true;
+});
+
+ipcMain.handle('start-download', async (_, url) => {
+  if (!url || !mainWindow) return false;
+  mainWindow.webContents.downloadURL(url);
   return true;
 });
 

@@ -3,98 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webwin</title>
+  <title>Webwin Hub</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <div class="brand-section">
-        <div class="brand-dot"></div>
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-orb"></div>
         <div>
-          <div class="brand-title">Webwin</div>
-          <div class="brand-subtitle">Windows Browser</div>
+          <div class="brand-title">Webwin Hub</div>
+          <div class="brand-subtitle">Open-source apps for Windows</div>
         </div>
       </div>
 
-      <div class="tabs-section">
-        <div id="tabs" class="tabs"></div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="discover">Discover</button>
+        <button class="nav-item" data-view="downloads">Downloads</button>
+        <button class="nav-item" data-view="about">About</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-chip">Curated catalog</div>
+        <div class="footer-chip">Direct downloads</div>
+      </div>
+    </aside>
+
+    <main class="main-stage">
+      <header class="topbar">
+        <div class="hero-copy">
+          <h1>Install open-source tools faster</h1>
+          <p>Browse a curated Windows catalog, filter by category, inspect project details, and download releases directly.</p>
+        </div>
         <div class="topbar-actions">
-          <button id="menuButton" class="icon-button" type="button">☰</button>
-          <button id="newTabButton" class="icon-button primary" type="button">+</button>
+          <button id="refreshButton" class="ghost-button" type="button">Refresh catalog</button>
         </div>
+      </header>
+
+      <section class="search-row">
+        <input id="searchInput" class="search-input" type="text" placeholder="Search apps, tags, categories or publishers" />
+        <div id="categoryFilters" class="category-filters"></div>
+      </section>
+
+      <section id="discoverView" class="content-view active-view">
+        <section class="featured-panel">
+          <div>
+            <div class="eyebrow">Featured</div>
+            <h2>Build your Windows toolkit</h2>
+            <p>Code editors, media players, graphics suites, privacy tools, launchers, file utilities, and more.</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card"><span id="totalAppsStat">0</span><small>apps</small></div>
+            <div class="stat-card"><span id="visibleAppsStat">0</span><small>visible</small></div>
+            <div class="stat-card"><span id="categoriesStat">0</span><small>categories</small></div>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-header">
+            <h3>Catalog</h3>
+            <div id="resultsLabel" class="section-meta">0 results</div>
+          </div>
+          <div id="appsGrid" class="apps-grid"></div>
+        </section>
+      </section>
+
+      <section id="downloadsView" class="content-view">
+        <div class="section-header">
+          <h3>Downloads</h3>
+          <div class="section-meta">Tracked by the application</div>
+        </div>
+        <div id="downloadsList" class="downloads-list"></div>
+      </section>
+
+      <section id="aboutView" class="content-view">
+        <div class="about-card">
+          <h3>About Webwin Hub</h3>
+          <p>This desktop hub is designed to centralize open-source Windows software discovery in a fast local interface.</p>
+          <ul>
+            <li>Curated app library</li>
+            <li>Search and category filters</li>
+            <li>Project links and direct downloads</li>
+            <li>Electron desktop packaging for Windows</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <aside id="detailsPanel" class="details-panel hidden">
+      <div class="details-topbar">
+        <div>
+          <div id="detailsCategory" class="eyebrow">Category</div>
+          <h2 id="detailsName">App</h2>
+        </div>
+        <button id="closeDetailsButton" class="icon-button" type="button">×</button>
       </div>
-    </header>
-
-    <section class="toolbar">
-      <div class="nav-group">
-        <button id="backButton" class="icon-button" type="button">←</button>
-        <button id="forwardButton" class="icon-button" type="button">→</button>
-        <button id="reloadButton" class="icon-button" type="button">⟳</button>
-        <button id="homeButton" class="icon-button" type="button">⌂</button>
+      <p id="detailsDescription" class="details-description"></p>
+      <div class="details-meta">
+        <div><span>Publisher</span><strong id="detailsPublisher"></strong></div>
+        <div><span>License</span><strong id="detailsLicense"></strong></div>
+        <div><span>Platforms</span><strong id="detailsPlatforms"></strong></div>
       </div>
-
-      <form id="addressForm" class="address-form">
-        <input id="addressInput" class="address-input" type="text" placeholder="Search the web or enter a URL" autocomplete="off" />
-      </form>
-
-      <div class="actions-group">
-        <button id="bookmarkButton" class="action-button" type="button">Bookmark</button>
-        <button id="bookmarksToggleButton" class="action-button" type="button">Bookmarks</button>
+      <div class="tag-list" id="detailsTags"></div>
+      <div class="details-actions">
+        <button id="downloadButton" class="primary-button" type="button">Download</button>
+        <button id="websiteButton" class="ghost-button" type="button">Website</button>
+        <button id="repoButton" class="ghost-button" type="button">Repository</button>
       </div>
-    </section>
-
-    <div class="browser-stage">
-      <aside id="menuPanel" class="side-panel hidden">
-        <div class="panel-header">
-          <h2>Menu</h2>
-          <button id="closeMenuButton" class="icon-button" type="button">×</button>
-        </div>
-        <div class="menu-list">
-          <button id="menuNewTab" class="menu-item" type="button">New tab</button>
-          <button id="menuBookmarks" class="menu-item" type="button">Bookmarks</button>
-          <button id="menuHistory" class="menu-item" type="button">History</button>
-          <button id="menuDownloads" class="menu-item" type="button">Downloads</button>
-          <button id="menuRestore" class="menu-item" type="button">Restore session now</button>
-        </div>
-      </aside>
-
-      <aside id="bookmarksPanel" class="side-panel hidden panel-right">
-        <div class="panel-header">
-          <h2>Bookmarks</h2>
-          <button id="closeBookmarksButton" class="icon-button" type="button">×</button>
-        </div>
-        <div id="bookmarksList" class="panel-list"></div>
-      </aside>
-
-      <aside id="historyPanel" class="side-panel hidden panel-right">
-        <div class="panel-header">
-          <h2>History</h2>
-          <button id="closeHistoryButton" class="icon-button" type="button">×</button>
-        </div>
-        <div class="panel-actions">
-          <button id="clearHistoryButton" class="action-button" type="button">Clear history</button>
-        </div>
-        <div id="historyList" class="panel-list"></div>
-      </aside>
-
-      <aside id="downloadsPanel" class="side-panel hidden panel-right">
-        <div class="panel-header">
-          <h2>Downloads</h2>
-          <button id="closeDownloadsButton" class="icon-button" type="button">×</button>
-        </div>
-        <div id="downloadsList" class="panel-list"></div>
-      </aside>
-
-      <main id="webviews" class="webviews"></main>
-
-      <div class="bottom-info">
-        <div id="statusText">Ready</div>
-        <div id="pageMeta">No page loaded</div>
-      </div>
-    </div>
+    </aside>
   </div>
 
+  <script src="./apps-data.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

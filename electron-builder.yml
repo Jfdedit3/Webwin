@@ -1,5 +1,5 @@
-appId: com.jfdedit3.webwin
-productName: Webwin
+appId: com.jfdedit3.webwinhub
+productName: Webwin Hub
 publish: never
 directories:
   buildResources: build
@@ -19,4 +19,4 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: Webwin
+  shortcutName: Webwin Hub
