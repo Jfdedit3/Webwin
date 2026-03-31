@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webwin</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-section">
+        <div class="brand-dot"></div>
+        <div>
+          <div class="brand-title">Webwin</div>
+          <div class="brand-subtitle">Windows Browser</div>
+        </div>
+      </div>
+
+      <div class="tabs-section">
+        <div id="tabs" class="tabs"></div>
+        <button id="newTabButton" class="icon-button primary">+</button>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <div class="nav-group">
+        <button id="backButton" class="icon-button">←</button>
+        <button id="forwardButton" class="icon-button">→</button>
+        <button id="reloadButton" class="icon-button">⟳</button>
+        <button id="homeButton" class="icon-button">⌂</button>
+      </div>
+
+      <form id="addressForm" class="address-form">
+        <input id="addressInput" class="address-input" type="text" placeholder="Search the web or enter a URL" autocomplete="off" />
+      </form>
+
+      <div class="actions-group">
+        <button id="bookmarkButton" class="action-button">Bookmark</button>
+        <button id="bookmarksToggleButton" class="action-button">Bookmarks</button>
+      </div>
+    </section>
+
+    <section id="bookmarksPanel" class="bookmarks-panel hidden">
+      <div class="panel-header">
+        <h2>Bookmarks</h2>
+        <button id="closeBookmarksButton" class="icon-button">×</button>
+      </div>
+      <div id="bookmarksList" class="bookmarks-list"></div>
+    </section>
+
+    <section class="statusbar">
+      <div id="statusText">Ready</div>
+      <div id="pageMeta">No page loaded</div>
+    </section>
+
+    <main id="webviews" class="webviews"></main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
